@@ -1,0 +1,9 @@
+Click on (a fixed point of) a Drawer to focus it.
+Click on the background to unfocus.
+
++ (focused) 	-> create new fixed point of focused Drawer
++ (unfocused) 	-> create first fixed point of new Drawer and focus it
+- (focused)	-> delete latest fixed point of focused Drawer
+
+textfield for duration of loops
+colorpicker for fixed drawer
