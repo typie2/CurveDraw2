@@ -3,23 +3,101 @@ var drawers = [];
 var fps = 20;
 var loopDuration = 2000;
 var step = 0;
+var focusedDrawer = null;
+var focusedIndex = -1;
+var mouseDown = 0;
 
 
 window.onload = function(){
 	canvas 	= document.getElementById("canvas");
 	gc 		= canvas.getContext("2d");
+	document.addEventListener("mousedown", function( event ) {
+		mouseDown = 1;
+		var rect = canvas.getBoundingClientRect();
+		var x = event.clientX - rect.left;
+		var y = event.clientY - rect.top;
 
-	var d = new Drawer(0, 0);
-	d.addPoint(10, 10);
-	d.addPoint(20, 143);
-	d.addPoint(30, 23);
-	d.addPoint(14, 400);
+		focusedIndex = -1;
+		focusedDrawer = null;
+		drawers.forEach(function(drawer){
+			for(var i = 0; i < drawer.points.length; i++){
+				var dX = drawer.points[i][0] - x;
+				var dY = drawer.points[i][1] - y;
+				if(Math.sqrt(Math.pow(dX, 2) + Math.pow(dY, 2)) < 5){
+					focusedDrawer = drawer;
+					focusedIndex = i;
+					break;
+				}
+			}
+		});
+	}, false);
 
-	console.log(d.points);
-	d.step(10, 100);
-	console.log(d.lines);
+	document.addEventListener("mouseup", function( event ) {
+		down = 0;
+		focusedIndex = -1;
+	}, false);
 
-	drawers.push(d);
+	document.addEventListener("mousemove", function( event ) {
+		cursorPos = [event.clientX, event.clientY];
+
+		var rect = canvas.getBoundingClientRect();
+		var x = event.clientX - rect.left;
+		var y = event.clientY - rect.top;
+		var hover = false;
+		drawers.forEach(function(drawer){
+			for(var i = 0; i < drawer.points.length; i++){
+				var dX = drawer.points[i][0] - x;
+				var dY = drawer.points[i][1] - y;
+				if(Math.sqrt(Math.pow(dX, 2) + Math.pow(dY, 2)) < 5){
+					hover = true;
+				}
+			}
+		});
+		if(hover){
+			document.getElementById("canvas").style.cursor = "pointer";
+		}else{
+			document.getElementById("canvas").style.cursor = "default";
+		}
+		if(focusedIndex != -1){
+			focusedDrawer.movePoint(focusedIndex, x, y);
+		}
+	}, false);
+
+	document.addEventListener("keyup", function(event){
+//		console.log(event.key + " - " + cursorPos[0] + "|" + cursorPos[1]);
+		if(event.key == "+"){
+			var rect = canvas.getBoundingClientRect();
+			var x = cursorPos[0] - rect.left;
+			var y = cursorPos[1] - rect.top;
+			if(focusedDrawer != null){
+				focusedDrawer.addPoint(x, y);
+			}else{
+				var newDrawer = new Drawer(x, y);
+				drawers.push(newDrawer);
+				focusedDrawer = newDrawer;
+			}
+			
+//			document.getElementById("numberInput").value = lines.length - 1;
+		}
+		else if(event.key == "-"){
+			if(focusedDrawer != null){
+				focusedDrawer.removeLastPoint();
+				if(focusedDrawer.points.length == 0){
+					drawers.splice(drawers.indexOf(focusedDrawer));
+				}
+			}
+		}
+		else if(event.key == "f"){
+			launchFullScreen(canvas);
+			canvas.width = window.innerWidth;
+			canvas.height = window.innerHeight;
+//			gc.scale(window.innerWidth / dimensions[0], window.innerHeight / dimensions[1]);
+		}else if(event.key == "Esc"){
+			canvas.width = dimensions[0];
+			canvas.height = dimensions[1];
+//			gc.scale(1 / window.innerWidth / dimensions[0], 1 / window.innerHeight / dimensions[1]);
+		}
+	}, false);
 
 	setInterval(update, 1000 / fps);
 }
@@ -39,46 +117,17 @@ function render(){
 	gc.fillStyle = backgroundcolor;
 	gc.fillRect(0, 0, canvas.width, canvas.height);
 
-	drawLines(drawers[0].points, "#222222", 1);
+	drawers.forEach(function(drawer){
+		if(drawer == focusedDrawer){
+			drawer.mainColor = "#C0392B";
+			drawer.curveColor = "#D98880";
+		}else{
+			drawer.mainColor = "#222222";
+			drawer.curveColor = "#777777";
+		}
 
-	drawCircles(drawers[0].points, "#222222", 2.5, 1);
-	drawCircles(drawers[0].points, "#222222", 4.5, 1);
-
-	for(var i = 0; i < drawers[0].lines.length; i++){
-		drawLines(drawers[0].lines[i], "#222222", 1);
-		drawCircles(drawers[0].lines[i], "#222222", 1.5, 1);
-	}
-
-	if(drawers[0].points.length > 0){
-		gc.beginPath();
-		gc.arc(drawers[0].lines[drawers[0].lines.length - 1][0][0], drawers[0].lines[drawers[0].lines.length - 1][0][1], 1.5, 0, 2 * Math.PI, false);
-		gc.stroke();
-	}
-
-	drawLines(drawers[0].curve, "#777777", 3);
-}
-
-function drawLine(pos1, pos2, color, width){
-	gc.strokeStyle = color;
-	gc.lineWidth = width;
-	gc.beginPath();
-	gc.moveTo(pos1[0], pos1[1]);
-	gc.lineTo(pos2[0], pos2[1]);
-	gc.stroke();
-}
-
-function drawLines(list, color, width){
-	for(var i = 0; i < list.length - 1; i++){
-		drawLine(list[i], list[i + 1], color, width);
-	}
-}
-
-function drawCircles(list, color, radius, width){ //void ctx.arc(x, y, radius, startAngle, endAngle, anticlockwise); 2.5 4.5
-	gc.strokeStyle = color;
-	gc.lineWidth = width;
-	for(var i = 0; i < list.length; i++){
-		gc.beginPath();
-		gc.arc(list[i][0], list[i][1], radius, 0, 2 * Math.PI, false);
-		gc.stroke();
-	}
+		drawer.drawPoints(gc);
+		drawer.drawLns(gc);
+		drawer.drawCurve(gc);
+	});
 }
