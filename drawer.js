@@ -96,16 +96,14 @@ class Drawer{
 	}
 
 	drawPoints(gc){
-		if(this.points.length > 1){
-			this.drawLines(this.points, this.mainColor, 1, gc);
-		}
-
 		this.drawCircles(this.points, this.mainColor, 2.5, 1, gc);
 		this.drawCircles(this.points, this.mainColor, 4.5, 1, gc);
 	}
 
 	drawLns(gc){
 		if(this.points.length > 1){
+			this.drawLines(this.points, this.mainColor, 1, gc);
+
 			for(var i = 0; i < this.lines.length; i++){
 				this.drawLines(this.lines[i], this.mainColor, 1, gc);
 				this.drawCircles(this.lines[i], this.mainColor, 1.5, 1, gc);

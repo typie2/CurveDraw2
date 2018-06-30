@@ -1,16 +1,24 @@
 var backgroundcolor = "#cccccc";
 var drawers = [];
-var fps = 20;
-var loopDuration = 2000;
+var fps = 60;
+var loopDuration = 5;
 var step = 0;
 var focusedDrawer = null;
 var focusedIndex = -1;
 var mouseDown = 0;
 
-
 window.onload = function(){
 	canvas 	= document.getElementById("canvas");
 	gc 		= canvas.getContext("2d");
+
+	checkPoints 	= document.getElementById("points");
+	checkLines	 	= document.getElementById("lines");
+	checkCurve 		= document.getElementById("curve");
+	mc 		= document.getElementById("mainColor");
+	cc 		= document.getElementById("curveColor");
+	fmc 	= document.getElementById("fMainColor");
+	fcc 	= document.getElementById("fCurveColor");
+
 	document.addEventListener("mousedown", function( event ) {
 		mouseDown = 1;
 		var rect = canvas.getBoundingClientRect();
@@ -99,11 +107,11 @@ window.onload = function(){
 		}
 	}, false);
 
-	setInterval(update, 1000 / fps);
+	interval = setInterval(update, 1000 / fps);
 }
 
 function update(){
-	var maxSteps = loopDuration / fps;
+	var maxSteps = loopDuration * fps;
 	step = (step + 1) % maxSteps;
 
 	drawers.forEach(function(drawer){
@@ -119,15 +127,31 @@ function render(){
 
 	drawers.forEach(function(drawer){
 		if(drawer == focusedDrawer){
-			drawer.mainColor = "#C0392B";
-			drawer.curveColor = "#D98880";
+			drawer.mainColor = fmc.value;
+			drawer.curveColor = fcc.value;
 		}else{
-			drawer.mainColor = "#222222";
-			drawer.curveColor = "#777777";
+			drawer.mainColor = mc.value;
+			drawer.curveColor = cc.value;
 		}
 
-		drawer.drawPoints(gc);
-		drawer.drawLns(gc);
-		drawer.drawCurve(gc);
+		if(checkPoints.checked){
+			drawer.drawPoints(gc);
+		}
+		if(checkLines.checked){
+			drawer.drawLns(gc);
+		}
+		if(checkCurve.checked){
+			drawer.drawCurve(gc);
+		}
 	});
+}
+
+function changeDuration(){
+	loopDuration = document.getElementById("duration").value;
+}
+
+function changeFPS(){
+	fps = document.getElementById("fps").value;
+	clearInterval(interval);
+	interval = setInterval(update, 1000 / fps);
 }

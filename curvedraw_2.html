@@ -10,5 +10,42 @@
 		<div class="container">
 			<canvas height="720" width="1080" id="canvas"></canvas>
 		</div>
+		<div>
+			<input type="checkbox" name="points" id="points" checked="checked"><label for="points">Points</label>
+			<input type="checkbox" name="lines" id="lines" checked="checked"><label for="lines">Lines</label>
+			<input type="checkbox" name="curve" id="curve" checked="checked"><label for="curve">Curve</label>
+			<table>
+				<tr>
+					<td>Loop-duration (seconds):</td>
+					<td><input type="number" name="duration" id="duration" min="0.1" step="0.1" value="5" onchange="changeDuration()"></td>
+				</tr>
+				<tr>
+					<td>FPS:</td>
+					<td><input type="number" name="fps" id="fps" min="1" step="1" value="30" onchange="changeFPS()"></td>
+				</tr>
+			</table>
+			<table>
+				<tr>
+					<th>Element</th>
+					<th>Color</th>
+				</tr>
+				<tr>
+					<td>Lines and Points (unfocused)</td>
+					<td><input type="color" name="mainColor" id="mainColor" value="#222222"></td>
+				</tr>
+				<tr>
+					<td>Curve (unfocused)</td>
+					<td><input type="color" name="curveColor" id="curveColor" value="#777777"></td>
+				</tr>
+				<tr>
+					<td>Lines and Points (focused)</td>
+					<td><input type="color" name="fMainColor" id="fMainColor" value="#C0392B"></td>
+				</tr>
+				<tr>
+					<td>Curve (focused)</td>
+					<td><input type="color" name="fCurveColor" id="fCurveColor" value="#D98880"></td>
+				</tr>
+			</table>
+		</div>
 	</body>
 </html>
